@@ -1,0 +1,60 @@
+# @(#) $Id: cfg2html,v 5.14 2012-11-13 21:23:41 ralph Exp $
+############################################################################
+# This is a wrapper for cfg2html(-hpux).sh (shortcut) and can be
+# customized to fit your needs.
+#
+
+
+# reset local language to "C" -> English, default catalog, rr-25032010
+export LANG="C"
+export LANG_ALL="C"
+export LC_MESSAGE="C"           ## needed?
+
+SCRIPT=""
+
+# If cfg2html is installed in a directory not in the PATH ## menguyj@yahoo.fr add 06.03.2012
+MYPATH=`dirname $0`  				## menguyj@yahoo.fr add 06.03.2012
+
+## this should work, if you have proper installed the cfg2html package with swinstall (hpux) or rpm/debpkg
+case $(uname) in
+HP-UX) 	SCRIPT="${MYPATH}/cfg2html_hpux.sh" ;;		## 31.03.2005 rr, 13.11.2012 Orlin Vasilev
+Linux)  SCRIPT="${MYPATH}/cfg2html-linux";;		## menguyj@yahoo.fr modify 06.03.2012
+*)	echo "$0: Yet unsupported operating system!"; exit 2 ;;
+esac
+
+## now do a sanity check!
+
+if [ ! -x $SCRIPT ]
+then
+        echo "Shellscript $SCRIPT is not executable, or was not found in the PATH!"
+        [ ! -r $SCRIPT ] && echo "ERROR: $SCRIPT: Not found!"
+        exit 3
+fi
+
+# fix by Gerrit Verdick, 15.12.2009
+if [ "X$1" = "X-h" -o "X$1" = "X-?" ]
+then
+	echo "@(#) $Id: cfg2html,v 5.14 2012-11-13 21:23:41 ralph Exp $"
+	echo "This is a wrapper for $SCRIPT and adds additional options to the"
+	echo "command line. Please execute $SCRIPT -h to obtain a short online help"
+	exit 1
+fi
+
+# Maybe this redundant and we should use $OPTION=-x in the case statement above
+case $(uname) in
+HP-UX) 	${SCRIPT} ${*} -0 -o/tmp ;;			## 31.03.2005
+Linux)  ${SCRIPT} ${*} -A -P  ;;		        ## 08.06.2006
+*)	echo "$0: Yet unsupported operating system!"; exit 2 ;;
+esac
+
+RETCODE=$?
+
+if [ $RETCODE -eq 0 ]
+then
+	# Customize this to fit your needs! copy logs e.g. to a FTP server
+        :
+else
+	echo "Error ($0): Returncode=$RETCODE"
+fi
+
+exit $RETCODE
